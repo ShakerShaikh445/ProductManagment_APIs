@@ -1,0 +1,6 @@
+@FMCO_APIs_HostAddress = http://localhost:5246
+
+GET {{FMCO_APIs_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
