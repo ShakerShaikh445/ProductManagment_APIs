@@ -12,7 +12,7 @@ using ProductManagment_APIs.Data;
 namespace ProductManagment_APIs.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260616132357_Inital")]
+    [Migration("20260620071950_Inital")]
     partial class Inital
     {
         /// <inheritdoc />

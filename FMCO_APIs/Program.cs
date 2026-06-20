@@ -18,8 +18,32 @@ using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
+#region Database Configuration
+
+var provider = builder.Configuration["DatabaseSettings:Provider"];
+
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+{
+    switch (provider?.ToLower())
+    {
+        case "sqlserver":
+            options.UseSqlServer(
+                builder.Configuration.GetConnectionString("SqlServer"));
+            break;
+
+        case "postgresql":
+        case "postgres":
+        case "npgsql":
+            options.UseNpgsql(
+                builder.Configuration.GetConnectionString("PostgreSql"));
+            break;
+
+        default:
+            throw new Exception("Invalid database provider. Use 'SqlServer' or 'PostgreSql' in appsettings.json.");
+    }
+});
+
+#endregion
 
 builder.Services.AddSingleton<LogHelper>();
 
@@ -28,11 +52,9 @@ builder.Services.AddScoped<IJwtService, JwtService>();
 builder.Services.AddScoped<IItemRepository, ItemRepository>();
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
 
-
 builder.Services.AddResponseCompression(options =>
 {
     options.EnableForHttps = true;
-
     options.Providers.Add<GzipCompressionProvider>();
     options.Providers.Add<BrotliCompressionProvider>();
 });
@@ -46,7 +68,6 @@ builder.Services.Configure<BrotliCompressionProviderOptions>(options =>
 {
     options.Level = CompressionLevel.Fastest;
 });
-
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 .AddJwtBearer(options =>
@@ -85,7 +106,6 @@ builder.Services.AddControllers()
 
 builder.Services.AddEndpointsApiExplorer();
 
-
 builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo
@@ -109,17 +129,16 @@ builder.Services.AddSwaggerGen(c =>
         {
             new OpenApiSecurityScheme
             {
-                Reference=new OpenApiReference
+                Reference = new OpenApiReference
                 {
-                    Type=ReferenceType.SecurityScheme,
-                    Id="Bearer"
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "Bearer"
                 }
             },
             Array.Empty<string>()
         }
     });
 });
-
 
 builder.Services.AddCors(options =>
 {
@@ -138,6 +157,28 @@ builder.Services.AddHttpContextAccessor();
 
 var app = builder.Build();
 
+#region Auto Apply Migrations
+
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+
+    try
+    {
+        var context = services.GetRequiredService<AppDbContext>();
+
+        // Create the database if it doesn't exist and apply pending migrations
+        context.Database.Migrate();
+    }
+    catch (Exception ex)
+    {
+        var logger = services.GetRequiredService<ILogger<Program>>();
+        logger.LogError(ex, "An error occurred while applying database migrations.");
+    }
+}
+
+#endregion
+
 app.UseSwagger();
 
 app.UseSwaggerUI(c =>
@@ -147,7 +188,6 @@ app.UseSwaggerUI(c =>
 });
 
 app.UseHttpsRedirection();
-
 
 app.UseResponseCompression();
 
