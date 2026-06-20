@@ -22,27 +22,18 @@ var builder = WebApplication.CreateBuilder(args);
 
 var provider = builder.Configuration["DatabaseSettings:Provider"];
 
-builder.Services.AddDbContext<AppDbContext>(options =>
+if (provider == "SqlServer")
 {
-    switch (provider?.ToLower())
-    {
-        case "sqlserver":
-            options.UseSqlServer(
-                builder.Configuration.GetConnectionString("SqlServer"));
-            break;
-
-        case "postgresql":
-        case "postgres":
-        case "npgsql":
-            options.UseNpgsql(
-                builder.Configuration.GetConnectionString("PostgreSql"));
-            break;
-
-        default:
-            throw new Exception("Invalid database provider. Use 'SqlServer' or 'PostgreSql' in appsettings.json.");
-    }
-});
-
+    builder.Services.AddDbContext<AppDbContext, SqlServerDbContext>(options =>
+        options.UseSqlServer(
+            builder.Configuration.GetConnectionString("SqlServer")));
+}
+else
+{
+    builder.Services.AddDbContext<AppDbContext, PostgreSqlDbContext>(options =>
+        options.UseNpgsql(
+            builder.Configuration.GetConnectionString("PostgreSql")));
+}
 #endregion
 
 builder.Services.AddSingleton<LogHelper>();
