@@ -24,7 +24,7 @@
             if (!Convert.ToBoolean(_configuration["LogSettings:LogEnable"]))
                 return;
 
-            string log = $"{DateTime.Now:yyyy-MM-dd HH:mm:ss},{type},{message}";
+            string log = $"{DateTime.UtcNow:yyyy-MM-dd HH:mm:ss},{type},{message}";
 
             bool isCsv = Convert.ToBoolean(_configuration["LogSettings:IsLogCSV"]);
 
@@ -35,7 +35,7 @@
                 if (!Directory.Exists(folder))
                     Directory.CreateDirectory(folder);
 
-                string file = Path.Combine(folder, $"Log_{DateTime.Now:yyyyMMdd}.csv");
+                string file = Path.Combine(folder, $"Log_{DateTime.UtcNow:yyyyMMdd}.csv");
 
                 if (!File.Exists(file))
                 {

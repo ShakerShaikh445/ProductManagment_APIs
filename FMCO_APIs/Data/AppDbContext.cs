@@ -83,14 +83,14 @@ namespace ProductManagment_APIs.Data
             {
                 if (entry.State == EntityState.Added)
                 {
-                    entry.Entity.CreatedAT = DateTime.Now;
+                    entry.Entity.CreatedAT = DateTime.UtcNow;
 
                     entry.Entity.CreatedBy = 1;
                 }
 
                 if (entry.State == EntityState.Modified)
                 {
-                    entry.Entity.UpdatedAt = DateTime.Now;
+                    entry.Entity.UpdatedAt = DateTime.UtcNow;
 
                     entry.Entity.UpdatedBy = 1;
 

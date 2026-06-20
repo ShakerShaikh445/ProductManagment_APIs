@@ -19,13 +19,15 @@ namespace ProductManagment_APIs.Middleware
             }
             catch (Exception ex)
             {
-                context.Response.StatusCode = 500;
+                context.Response.StatusCode = StatusCodes.Status500InternalServerError;
                 context.Response.ContentType = "application/json";
 
                 var result = new
                 {
                     Success = false,
-                    Message = ex.Message
+                    Message = ex.Message,
+                    InnerException = ex.InnerException?.Message,
+                    StackTrace = ex.StackTrace
                 };
 
                 await context.Response.WriteAsync(JsonSerializer.Serialize(result));
