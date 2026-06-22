@@ -143,7 +143,18 @@ builder.Services.AddCors(options =>
               .AllowCredentials();
     });
 });
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowFlutter", policy =>
+    {
+        policy
+            .AllowAnyOrigin()
+            .AllowAnyHeader()
+            .AllowAnyMethod();
+    });
+});
 
+app.UseCors("AllowFlutter");
 builder.Services.AddHttpContextAccessor();
 
 var app = builder.Build();
