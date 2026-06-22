@@ -1,8 +1,8 @@
 using ProductManagment_APIs.Data;
 using ProductManagment_APIs.Interface;
+using ProductManagment_APIs.Middleware;
 using ProductManagment_APIs.Repositories;
 using ProductManagment_APIs.Service;
-using ProductManagment_APIs.Middleware;
 
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.ResponseCompression;
@@ -34,7 +34,10 @@ else
         options.UseNpgsql(
             builder.Configuration.GetConnectionString("PostgreSql")));
 }
+
 #endregion
+
+#region Dependency Injection
 
 builder.Services.AddSingleton<LogHelper>();
 
@@ -42,6 +45,10 @@ builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IJwtService, JwtService>();
 builder.Services.AddScoped<IItemRepository, ItemRepository>();
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
+
+#endregion
+
+#region Response Compression
 
 builder.Services.AddResponseCompression(options =>
 {
@@ -59,6 +66,10 @@ builder.Services.Configure<BrotliCompressionProviderOptions>(options =>
 {
     options.Level = CompressionLevel.Fastest;
 });
+
+#endregion
+
+#region JWT Authentication
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 .AddJwtBearer(options =>
@@ -88,6 +99,10 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
 builder.Services.AddAuthorization();
 
+#endregion
+
+#region Controllers
+
 builder.Services.AddControllers()
 .AddJsonOptions(options =>
 {
@@ -97,11 +112,15 @@ builder.Services.AddControllers()
 
 builder.Services.AddEndpointsApiExplorer();
 
+#endregion
+
+#region Swagger
+
 builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo
     {
-        Title = "ProductManagment_APIs",
+        Title = "Product Management API",
         Version = "v1"
     });
 
@@ -112,7 +131,7 @@ builder.Services.AddSwaggerGen(c =>
         Scheme = "Bearer",
         BearerFormat = "JWT",
         In = ParameterLocation.Header,
-        Description = "Enter JWT Token : Bearer {token}"
+        Description = "Bearer {token}"
     });
 
     c.AddSecurityRequirement(new OpenApiSecurityRequirement
@@ -131,18 +150,10 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy("AllowReact", policy =>
-    {
-        policy.WithOrigins(
-                "http://localhost:5173",
-                "http://localhost:3005")
-              .AllowAnyMethod()
-              .AllowAnyHeader()
-              .AllowCredentials();
-    });
-});
+#endregion
+
+#region CORS
+
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFlutter", policy =>
@@ -152,14 +163,26 @@ builder.Services.AddCors(options =>
             .AllowAnyHeader()
             .AllowAnyMethod();
     });
+
+    options.AddPolicy("AllowReact", policy =>
+    {
+        policy
+            .WithOrigins(
+                "http://localhost:5173",
+                "http://localhost:3005")
+            .AllowAnyHeader()
+            .AllowAnyMethod()
+            .AllowCredentials();
+    });
 });
 
-app.UseCors("AllowFlutter");
+#endregion
+
 builder.Services.AddHttpContextAccessor();
 
 var app = builder.Build();
 
-#region Auto Apply Migrations
+#region Auto Migration
 
 using (var scope = app.Services.CreateScope())
 {
@@ -168,24 +191,24 @@ using (var scope = app.Services.CreateScope())
     try
     {
         var context = services.GetRequiredService<AppDbContext>();
-
-        // Create the database if it doesn't exist and apply pending migrations
         context.Database.Migrate();
     }
     catch (Exception ex)
     {
         var logger = services.GetRequiredService<ILogger<Program>>();
-        logger.LogError(ex, "An error occurred while applying database migrations.");
+        logger.LogError(ex, "Migration Failed");
     }
 }
 
 #endregion
 
+#region Middleware Pipeline
+
 app.UseSwagger();
 
 app.UseSwaggerUI(c =>
 {
-    c.SwaggerEndpoint("/swagger/v1/swagger.json", "ProductManagment_APIs V1");
+    c.SwaggerEndpoint("/swagger/v1/swagger.json", "Product Management API V1");
     c.RoutePrefix = "swagger";
 });
 
@@ -204,14 +227,16 @@ app.UseStaticFiles(new StaticFileOptions
 
 app.UseRouting();
 
-app.UseMiddleware<ExceptionMiddleware>();
+app.UseCors("AllowFlutter");
 
-app.UseCors("AllowReact");
+app.UseMiddleware<ExceptionMiddleware>();
 
 app.UseAuthentication();
 
 app.UseAuthorization();
 
 app.MapControllers();
+
+#endregion
 
 app.Run();
