@@ -12,7 +12,7 @@ public class AppUser : Audit
     public string UserName { get; set; } = string.Empty;
 
     public string Email { get; set; } = string.Empty;
-
+    public string? DeviceId { get; set; }
     [Required]
     public byte[] PasswordHash { get; set; }
 

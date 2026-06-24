@@ -63,6 +63,7 @@ namespace ProductManagment_APIs.Repositories
                     UserName = x.UserName,
                     Email = x.Email,
                     IsActive = x.IsActive,
+                    DeviceId = x.DeviceId,
                     Roles = x.UserRoles.Select(r => r.Role.RoleName).ToList()
                 }).ToListAsync();
 
@@ -99,6 +100,7 @@ namespace ProductManagment_APIs.Repositories
                         UserName = x.UserName,
                         Email = x.Email,
                         IsActive = x.IsActive,
+                        DeviceId = x.DeviceId,
                         Roles = x.UserRoles.Select(r => r.Role.RoleName).ToList()
                     })
                     .FirstOrDefaultAsync();
@@ -125,6 +127,7 @@ namespace ProductManagment_APIs.Repositories
                 {
                     UserName = dto.UserName,
                     Email = dto.Email,
+                    DeviceId = dto.DeviceId,
                     PasswordHash = PasswordHelper.HashPassword(dto.Password),
                     IsActive = true
                 };
@@ -166,8 +169,18 @@ namespace ProductManagment_APIs.Repositories
                 if (user == null)
                     return false;
 
-                user.UserName = dto.UserName;
-                user.Email = dto.Email;
+                if(dto.UserName != null)
+                { 
+                    user.UserName = dto.UserName;
+                }
+                if (dto.Email != null)
+                {
+                    user.Email = dto.Email;
+                }
+                if (dto.DeviceId != null)
+                {
+                    user.DeviceId = dto.DeviceId;
+                }
 
                 if (!string.IsNullOrWhiteSpace(dto.Password))
                 {

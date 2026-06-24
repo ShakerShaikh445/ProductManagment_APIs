@@ -1,4 +1,5 @@
-﻿using ProductManagment_APIs.Data;
+﻿using Microsoft.EntityFrameworkCore;
+using ProductManagment_APIs.Data;
 using ProductManagment_APIs.DTOs;
 using ProductManagment_APIs.Interface;
 using ProductManagment_APIs.Model;

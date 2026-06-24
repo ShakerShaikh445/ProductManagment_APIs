@@ -1,15 +1,14 @@
-using ProductManagment_APIs.Data;
-using ProductManagment_APIs.Interface;
-using ProductManagment_APIs.Middleware;
-using ProductManagment_APIs.Repositories;
-using ProductManagment_APIs.Service;
-
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
-
+using ProductManagment_APIs.Data;
+using ProductManagment_APIs.Interface;
+using ProductManagment_APIs.Middleware;
+using ProductManagment_APIs.Repositories;
+using ProductManagment_APIs.Repository;
+using ProductManagment_APIs.Service;
 using System.IO.Compression;
 using System.Security.Claims;
 using System.Text;
@@ -45,6 +44,8 @@ builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IJwtService, JwtService>();
 builder.Services.AddScoped<IItemRepository, ItemRepository>();
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
+builder.Services.AddScoped<ILocationService, LocationService>();
+builder.Services.AddScoped<ILocationRepository, LocationRepository>();
 
 #endregion
 

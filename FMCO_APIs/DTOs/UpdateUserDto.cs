@@ -13,7 +13,7 @@ namespace ProductManagment_APIs.DTOs
         [Required]
         [EmailAddress]
         public string Email { get; set; } = string.Empty;
-
+        public string? DeviceId { get; set; }
         public string? Password { get; set; }
 
         [Required]

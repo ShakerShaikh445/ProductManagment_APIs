@@ -9,7 +9,7 @@
         public string Email { get; set; }
 
         public bool IsActive { get; set; }
-
+        public string? DeviceId { get; set; }
         public List<string> Roles { get; set; } = new();
     }
 }
