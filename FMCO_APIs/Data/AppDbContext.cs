@@ -13,6 +13,7 @@ namespace ProductManagment_APIs.Data
         public DbSet<UserRole> UserRoles { get; set; }
         public DbSet<AppUser> MasterUsers { get; set; }
         public DbSet<Product> Products { get; set; }
+        public DbSet<Location> Locations { get; set; }
 
         public DbSet<Item> Items { get; set; }
 
